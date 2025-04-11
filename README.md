@@ -5,8 +5,8 @@
 To view this project locally in your browser, follow the steps below using the **Live Server** extension in Visual Studio Code:
 
 ### Prerequisites
-- [Visual Studio Code]installed
-- [Live Server Extension]installed
+- Visual Studio Code
+- Live Server Extension
 
 ### Steps
 1. Open the project folder in **VS Code**.
