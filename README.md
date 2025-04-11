@@ -15,3 +15,5 @@ To view this project locally in your browser, follow the steps below using the *
 4. Your default browser will open a new tab displaying the project.
 5. Any changes you make to the files will auto-refresh in the browser.
 
+> 🎵 When you click on **Music Analytics** in the sidebar, it will navigate to the **Listening Trends** visualization, which is currently under development.  
+> In the meantime, please explore the available visualizations by using the **Visualization** dropdown and selecting any of the other four completed options.
