@@ -130,278 +130,7 @@
     
     <!-- Album trends JavaScript -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set up visualization type toggle
-            const visualizationType = document.getElementById('visualization-type');
-            const listeningTrendsSection = document.getElementById('listening-trends-section');
-            const albumTrendsSection = document.getElementById('album-trends-section');
-            const albumTrendsControls = document.querySelectorAll('.album-trends-control');
-            
-            visualizationType.addEventListener('change', function() {
-                if (this.value === 'album-trends') {
-                    listeningTrendsSection.style.display = 'none';
-                    albumTrendsSection.style.display = 'block';
-                    albumTrendsControls.forEach(control => control.style.display = 'block');
-                    // Initialize album chart if not already initialized
-                    if (!albumChartInitialized) {
-                        initAlbumChart();
-                    }
-                } else {
-                    listeningTrendsSection.style.display = 'block';
-                    albumTrendsSection.style.display = 'none';
-                    albumTrendsControls.forEach(control => control.style.display = 'none');
-                }
-            });
-            
-            // Hide album trends controls by default
-            albumTrendsControls.forEach(control => control.style.display = 'none');
-            
-            // Album Trends Visualization Code
-            let albumChartInitialized = false;
-            
-            function initAlbumChart() {
-                // Chart dimensions
-                const margin = {top: 50, right: 200, bottom: 70, left: 80};
-                const width = 900 - margin.left - margin.right;
-                const height = 500 - margin.top - margin.bottom;
-                
-                // Initialize tooltip
-                const tooltip = d3.select("body")
-                    .append("div")
-                    .attr("class", "tooltip")
-                    .style("opacity", 0);
-                    
-                // Color scale
-                const color = d3.scaleOrdinal(d3.schemeCategory10);
-                
-                // Create SVG
-                const svg = d3.select("#album-chart-container")
-                    .append("svg")
-                    .attr("width", width + margin.left + margin.right)
-                    .attr("height", height + margin.top + margin.bottom)
-                    .append("g")
-                    .attr("transform", `translate(${margin.left},${margin.top})`); 
-                // Load data
-                d3.json("../data/Merge Data/all_albums.json").then(data => {
-                    console.log("Data loaded successfully:", data);
-                    // Process data
-                    // Invert rank (lower rank number is better)
-                    data.forEach(d => {
-                        d.rank = +d.rank;  // Make sure rank is a number
-                        d.peak = +d.peak;
-                        d.previous = +d.previous;
-                    });
-                    
-                    // Get unique weeks
-                    const weeks = [...new Set(data.map(d => d.week))].sort();
-                    
-                    // Get unique artists
-                    const artists = [...new Set(data.map(d => d.artist))].sort();
-                    
-                    // Populate artist dropdown (use the existing one)
-                    const artistSelect = d3.select("#artist-select");
-                    // Clear existing options first (keeping the 'All Artists' option)
-                    artistSelect.selectAll("option:not([value='all'])")
-                        .remove();
-                        
-                    artists.forEach(artist => {
-                        artistSelect.append("option")
-                            .attr("value", artist)
-                            .text(artist);
-                    });
-                    
-                    // Find the top N albums across all weeks
-                    function getTopAlbums(filteredData, topN) {
-                        // Group by album and calculate average rank
-                        const albumGroups = d3.group(filteredData, d => d.album);
-                        
-                        const albumStats = Array.from(albumGroups, ([album, entries]) => {
-                            return {
-                                album: album,
-                                artist: entries[0].artist,  // assuming same artist per album
-                                avgRank: d3.mean(entries, d => d.rank),
-                                count: entries.length,  // number of weeks on chart
-                                // Add first and last week for each album
-                                firstWeek: d3.min(entries, d => d.week),
-                                lastWeek: d3.max(entries, d => d.week)
-                            };
-                        });
-                        
-                        // Sort by average rank
-                        albumStats.sort((a, b) => a.avgRank - b.avgRank);
-                        
-                        // Return top N
-                        return albumStats.slice(0, topN);
-                    }
-                    
-                    // Create scales
-                    const xScale = d3.scalePoint()
-                        .domain(weeks)
-                        .range([0, width])
-                        .padding(0.5);
-                        
-                    const yScale = d3.scaleLinear()
-                        .domain([20, 0])  // Inverted rank (0 is best)
-                        .range([height, 0]);
-                        
-                    // Create axes
-                    const xAxis = svg.append("g")
-                        .attr("transform", `translate(0,${height})`)
-                        .call(d3.axisBottom(xScale)
-                            .tickValues(xScale.domain().filter((d, i) => i % 4 === 0))  // Show every 4th tick
-                            .tickFormat(d => {
-                                const date = new Date(d);
-                                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                            }));
-                            
-                    // Rotate x-axis labels
-                    xAxis.selectAll("text")
-                        .style("text-anchor", "end")
-                        .attr("dx", "-.8em")
-                        .attr("dy", ".15em")
-                        .attr("transform", "rotate(-45)");
-                        
-                    const yAxis = svg.append("g")
-                        .call(d3.axisLeft(yScale).ticks(10));
-                        
-                    // Add axis labels
-                    svg.append("text")
-                        .attr("class", "axis-label")
-                        .attr("text-anchor", "middle")
-                        .attr("x", width / 2)
-                        .attr("y", height + margin.bottom - 10)
-                        .text("Week");
-                        
-                    svg.append("text")
-                        .attr("class", "axis-label")
-                        .attr("text-anchor", "middle")
-                        .attr("transform", "rotate(-90)")
-                        .attr("x", -height / 2)
-                        .attr("y", -margin.left + 20)
-                        .text("Chart Rank");
-                        
-                    // Create line generator
-                    const line = d3.line()
-                        .x(d => xScale(d.week))
-                        .y(d => yScale(d.rank))
-                        .defined(d => d.rank !== null && d.rank !== undefined);
-                        
-                    // Legend group
-                    const legend = svg.append("g")
-                        .attr("class", "legend")
-                        .attr("transform", `translate(${width + 20}, 0)`);
-                        
-                    // Function to update chart
-                    function updateChart() {
-                        // Clear previous content
-                        svg.selectAll(".line-path").remove();
-                        svg.selectAll(".album-dot").remove();
-                        legend.selectAll("*").remove();
-                        
-                        const selectedArtist = d3.select("#artist-select").property("value");
-                        const topN = +d3.select("#top-albums").property("value");
-                        
-                        let filteredData = data;
-                        
-                        // Filter by artist if selected
-                        if (selectedArtist && selectedArtist !== 'all') {
-                            filteredData = data.filter(d => d.artist === selectedArtist);
-                        }
-                        
-                        // Get top albums
-                        const topAlbums = getTopAlbums(filteredData, topN);
-                        
-                        // Update color domain
-                        color.domain(topAlbums.map(d => d.album));
-                        
-                        // Group data by album
-                        const albumGroups = d3.group(filteredData, d => d.album);
-                        
-                        // Draw lines for each top album
-                        topAlbums.forEach((albumInfo, i) => {
-                            const albumName = albumInfo.album;
-                            const albumData = albumGroups.get(albumName) || [];
-                            
-                            // Sort by week
-                            albumData.sort((a, b) => new Date(a.week) - new Date(b.week));
-                            
-                            // Draw line
-                            svg.append("path")
-                                .datum(albumData)
-                                .attr("class", "line-path")
-                                .attr("d", line)
-                                .attr("stroke", color(albumName))
-                                .attr("class", "line");
-                                
-                            // Add dots for each data point
-                            svg.selectAll(`.dot-${i}`)
-                                .data(albumData)
-                                .enter()
-                                .append("circle")
-                                .attr("class", "album-dot")
-                                .attr("cx", d => xScale(d.week))
-                                .attr("cy", d => yScale(d.rank))
-                                .attr("r", 4)
-                                .attr("fill", color(albumName))
-                                .on("mouseover", function(event, d) {
-                                    tooltip.transition()
-                                        .duration(200)
-                                        .style("opacity", .9);
-                                    tooltip.html(`
-                                        <strong>${d.album}</strong><br/>
-                                        Artist: ${d.artist}<br/>
-                                        Week: ${d.week}<br/>
-                                        Rank: ${d.rank + 1}<br/>
-                                        Previous: ${d.previous}<br/>
-                                        Peak: ${d.peak}<br/>
-                                        Weeks on chart: ${d.total_weeks}
-                                    `)
-                                    .style("left", (event.pageX + 10) + "px")
-                                    .style("top", (event.pageY - 28) + "px");
-                                })
-                                .on("mouseout", function() {
-                                    tooltip.transition()
-                                        .duration(500)
-                                        .style("opacity", 0);
-                                });
-                                
-                            // Add to legend
-                            const legendItem = legend.append("g")
-                                .attr("transform", `translate(0, ${i * 20})`);
-                                
-                            legendItem.append("rect")
-                                .attr("width", 15)
-                                .attr("height", 15)
-                                .attr("fill", color(albumName));
-                                
-                            legendItem.append("text")
-                                .attr("x", 20)
-                                .attr("y", 12)
-                                .text(`${albumName} (${albumInfo.artist})`);
-                        });
-                    }
-                    
-                    // Initial chart
-                    updateChart();
-                    
-                    // Add event listeners to update chart when controls change
-                    d3.select("#artist-select").on("change", updateChart);
-                    d3.select("#top-albums").on("change", updateChart);
-                    
-                    // Hide loading indicator
-                    d3.select("#loading").style("display", "none");
-                    
-                    // Set flag indicating chart is initialized
-                    albumChartInitialized = true;
-                    
-                }).catch(error => {
-                    console.error("Error loading album data:", error);
-                    d3.select("#album-chart-container")
-                        .append("p")
-                        .text("Error loading data. Please make sure the merged album data file exists at data/Merge Data/all_albums.json");
-                });
-            }
-        });
+        
         // Add a new option to the visualization type dropdown
 document.addEventListener('DOMContentLoaded', function() {
     // Add the new options to the visualization type dropdown
@@ -962,7 +691,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 // Add this to your existing script tag or create a new one
-
 document.addEventListener('DOMContentLoaded', function() {
     // Add the new option to the visualization type dropdown
     const visualizationType = document.getElementById('visualization-type');
@@ -1006,9 +734,10 @@ document.addEventListener('DOMContentLoaded', function() {
         contentSection.appendChild(topArtistsSection);
     }
 
-    // Add styles for the new visualization
+    // Add styles specific to this visualization with namespacing to prevent conflicts
     const styleElement = document.createElement('style');
     styleElement.textContent += `
+        /* Top Artists by Streams specific styles */
         .artist-streams-control {
             margin-bottom: 20px;
         }
@@ -1026,47 +755,53 @@ document.addEventListener('DOMContentLoaded', function() {
         .artist-dot {
             cursor: pointer;
         }
+        .artists-streams-tooltip {
+            position: absolute;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            pointer-events: none;
+            font-size: 12px;
+            z-index: 1000;
+        }
     `;
     document.head.appendChild(styleElement);
 
-    // Modify the existing visualization type change handler
-    const originalTypeChangeHandler = visualizationType.onchange;
-    visualizationType.addEventListener('change', function() {
-        // Call the original handler if it exists
-        if (typeof originalTypeChangeHandler === 'function') {
-            originalTypeChangeHandler.call(this);
-        }
-        
+    // Create a standalone event handler for just this visualization
+    visualizationType.addEventListener('change', function(event) {
+        const value = event.target.value;
         const topArtistsStreamsSection = document.getElementById('top-artists-streams-section');
         
-        // Handle our new visualization type
-        if (this.value === 'top-artists-streams') {
-            // Hide all other sections (this assumes your code already does this)
-            document.querySelectorAll('.visualization-section').forEach(section => {
-                section.style.display = 'none';
-            });
+        if (value === 'top-artists-streams') {
+            // Hide all visualization sections
+            const allSections = document.querySelectorAll('.visualization-section');
+            allSections.forEach(section => section.style.display = 'none');
             
-            // Show our section
+            // Show only our section
             topArtistsStreamsSection.style.display = 'block';
             
             // Initialize the chart if needed
             if (!window.topArtistsStreamsInitialized) {
                 initTopArtistsStreamsChart();
             }
+        } else {
+            // Hide our section when another visualization is selected
+            topArtistsStreamsSection.style.display = 'none';
         }
     });
 
-    // Global variable to track initialization
+    // Global variable to track initialization - scoped to just this visualization
     window.topArtistsStreamsInitialized = false;
     
-    // Function to initialize top artists streams chart
+    // Function to initialize top artists streams chart - completely self-contained
     window.initTopArtistsStreamsChart = function() {
         // Chart dimensions
         const margin = {top: 50, right: 160, bottom: 100, left: 80};
         const width = 900 - margin.left - margin.right;
         const height = 500 - margin.top - margin.bottom;
         
-        // Initialize tooltip
+        // Initialize tooltip specific to this visualization
         let tooltip = d3.select("body").select(".artists-streams-tooltip");
         if (tooltip.empty()) {
             tooltip = d3.select("body")
@@ -1074,6 +809,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 .attr("class", "tooltip artists-streams-tooltip")
                 .style("opacity", 0);
         }
+        
+        // Clear any existing content in the container
+        d3.select("#artists-streams-container").html("");
         
         // Create SVG
         const svg = d3.select("#artists-streams-container")
@@ -1101,7 +839,7 @@ document.addEventListener('DOMContentLoaded', function() {
             d3.json("../data/Merge Data/all_songs.json"),
             // You might want to add more data sources if needed
         ]).then(([songsData]) => {
-            console.log("Songs data loaded:", songsData);
+            console.log("Songs data loaded for top artists streams chart:", songsData);
                 
             // Process data
             // Extract unique weeks from the data
@@ -1300,7 +1038,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         .attr("stroke-width", 2);
                     
                     // Add dots for each data point
-                    svg.selectAll(`.dot-${i}`)
+                    svg.selectAll(`.artist-dot-${i}`)
                         .data(artistData)
                         .enter()
                         .append("circle")
@@ -1352,7 +1090,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Initial chart
             updateChart();
             
-            // Add event listeners
+            // Add event listeners specific to this visualization
             d3.select("#artists-time-range").on("change", updateChart);
             d3.select("#start-week").on("change", updateChart);
             d3.select("#top-artists-count").on("change", updateChart);
@@ -1368,7 +1106,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
 });
-// First, add the new option to the visualization type dropdown
+   
+
 document.addEventListener('DOMContentLoaded', function() {
     // Add the heatmap option to the visualization type dropdown
     const visualizationType = document.getElementById('visualization-type');
@@ -1412,9 +1151,10 @@ document.addEventListener('DOMContentLoaded', function() {
         contentSection.appendChild(heatmapSection);
     }
 
-    // Add custom styles for the heatmap visualization
+    // Add custom styles for the heatmap visualization - isolate with namespaced classes
     const styleElement = document.createElement('style');
     styleElement.textContent = `
+        /* Heatmap-specific styles */
         .heatmap-control {
             margin-bottom: 20px;
         }
@@ -1436,68 +1176,52 @@ document.addEventListener('DOMContentLoaded', function() {
             font-size: 12px;
             font-weight: bold;
         }
+        .artist-heatmap-tooltip {
+            position: absolute;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            pointer-events: none;
+            font-size: 12px;
+            z-index: 1000;
+        }
     `;
     document.head.appendChild(styleElement);
 
-    // Modify the existing visualization type change handler to include our new section
-    visualizationType.addEventListener('change', function() {
-        const listeningTrendsSection = document.getElementById('listening-trends-section');
-        const albumTrendsSection = document.getElementById('album-trends-section');
-        const rankMovementSection = document.getElementById('rank-movement-section');
-        const yearlyMovementSection = document.getElementById('yearly-movement-section');
+    // Create a standalone event handler for the heatmap visualization
+    visualizationType.addEventListener('change', function(event) {
+        const value = event.target.value;
         const artistHeatmapSection = document.getElementById('artist-heatmap-section');
-        const albumTrendsControls = document.querySelectorAll('.album-trends-control');
         
-        // Hide all sections first
-        listeningTrendsSection.style.display = 'none';
-        albumTrendsSection.style.display = 'none';
-        rankMovementSection.style.display = 'none';
-        yearlyMovementSection.style.display = 'none';
-        artistHeatmapSection.style.display = 'none';
-        albumTrendsControls.forEach(control => control.style.display = 'none');
-        
-        // Show the selected section
-        if (this.value === 'album-trends') {
-            albumTrendsSection.style.display = 'block';
-            albumTrendsControls.forEach(control => control.style.display = 'block');
-            // Initialize album chart if not already initialized
-            if (!window.albumChartInitialized) {
-                initAlbumChart();
-            }
-        } else if (this.value === 'rank-movement') {
-            rankMovementSection.style.display = 'block';
-            // Initialize rank movement chart if not already initialized
-            if (!window.rankMovementChartInitialized) {
-                initRankMovementChart();
-            }
-        } else if (this.value === 'yearly-movement') {
-            yearlyMovementSection.style.display = 'block';
-            // Initialize yearly movement chart if not already initialized
-            if (!window.yearlyMovementChartInitialized) {
-                initYearlyMovementChart();
-            }
-        } else if (this.value === 'artist-heatmap') {
+        if (value === 'artist-heatmap') {
+            // Show only heatmap section, hide others
+            const allSections = document.querySelectorAll('.visualization-section');
+            allSections.forEach(section => section.style.display = 'none');
+            
             artistHeatmapSection.style.display = 'block';
+            
             // Initialize artist heatmap if not already initialized
             if (!window.artistHeatmapInitialized) {
                 initArtistHeatmap();
             }
         } else {
-            listeningTrendsSection.style.display = 'block';
+            // Hide the heatmap section when another option is selected
+            artistHeatmapSection.style.display = 'none';
         }
     });
 
-    // Global variable to track initialization
+    // Global variable to track initialization - only for the heatmap
     window.artistHeatmapInitialized = false;
     
-    // Function to initialize artist heatmap
+    // Function to initialize artist heatmap - completely self-contained
     window.initArtistHeatmap = function() {
         // Chart dimensions
         const margin = {top: 50, right: 100, bottom: 100, left: 120};
         const width = 900 - margin.left - margin.right;
         const height = 500 - margin.top - margin.bottom;
         
-        // Initialize tooltip
+        // Initialize tooltip specific to heatmap
         let tooltip = d3.select("body").select(".artist-heatmap-tooltip");
         if (tooltip.empty()) {
             tooltip = d3.select("body")
@@ -1505,6 +1229,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 .attr("class", "tooltip artist-heatmap-tooltip")
                 .style("opacity", 0);
         }
+        
+        // Clear any existing content in the container before creating new SVG
+        d3.select("#artist-heatmap-container").html("");
         
         // Create SVG
         const svg = d3.select("#artist-heatmap-container")
@@ -1797,7 +1524,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Initialize heatmap
             updateHeatmap();
             
-            // Add event listeners
+            // Add event listeners specifically for heatmap controls
             d3.select("#top-artists").on("change", updateHeatmap);
             d3.select("#min-weeks").on("change", updateHeatmap);
             d3.select("#heatmap-time-range").on("change", updateHeatmap);
@@ -1813,7 +1540,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-    </script>
+// First, add the new option to the visualization type dropdown
+
+
+   </script>
     
 
     
