@@ -42,7 +42,7 @@
         <div class="logo">
             <img src="../data/spotify_image.jpg" alt="Spotify Logo"> Spotiviz
         </div>
-        <h1>Music Analytics</h1>
+        <h1>Analytics Dashboard</h1>
     </header>
      
     <div class="container">
@@ -1141,7 +1141,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <option value="all">All Time</option>
                         <option value="last-year">Last Year</option>
                         <option value="last-6-months">Last 6 Months</option>
-                        <option value="last-3-months">Last 3 Months</option>
+                        <option value="last-3-months" selected>Last 3 Months</option>
                     </select>
                 </div>
                 <div id="artist-heatmap-container"></div>
@@ -1540,7 +1540,350 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-// First, add the new option to the visualization type dropdown
+// Add this to your existing script tag or create a new one
+document.addEventListener('DOMContentLoaded', function() {
+    // Add the new option to the visualization type dropdown
+    const visualizationType = document.getElementById('visualization-type');
+    if (visualizationType) {
+        // Check if the option already exists
+        if (!Array.from(visualizationType.options).some(opt => opt.value === 'top-artists-bar')) {
+            const artistsBarsOption = document.createElement('option');
+            artistsBarsOption.value = 'top-artists-bar';
+            artistsBarsOption.textContent = 'Top Artists Bar Chart';
+            visualizationType.appendChild(artistsBarsOption);
+        }
+    }
+
+    // Create new section for top artists bar chart visualization
+    const contentSection = document.querySelector('.music-analytics-content');
+    if (contentSection && !document.getElementById('top-artists-bar-section')) {
+        const topArtistsBarSection = document.createElement('div');
+        topArtistsBarSection.id = 'top-artists-bar-section';
+        topArtistsBarSection.className = 'visualization-section';
+        topArtistsBarSection.style.display = 'none';  // Hidden by default
+        
+        topArtistsBarSection.innerHTML = `
+            <div class="visualization-container">
+                <h2>Top Artists by Total Streams</h2>
+                <div class="control-group artist-bar-control">
+                    <label for="artists-bar-time-range">Time Range:</label>
+                    <select id="artists-bar-time-range">
+                        <option value="12">12 weeks</option>
+                        <option value="24">24 weeks</option>
+                        <option value="52">52 weeks</option>
+                    </select>
+                    <label for="bar-start-week">Starting Week:</label>
+                    <select id="bar-start-week"></select>
+                    <label for="top-artists-bar-count">Top Artists:</label>
+                    <input type="number" id="top-artists-bar-count" min="3" max="20" value="5">
+                </div>
+                <div id="artists-bar-container"></div>
+            </div>
+        `;
+        
+        contentSection.appendChild(topArtistsBarSection);
+    }
+
+    // Add styles specific to this visualization with namespacing to prevent conflicts
+    const styleElement = document.createElement('style');
+    styleElement.textContent += `
+        /* Top Artists Bar Chart specific styles */
+        .artist-bar-control {
+            margin-bottom: 20px;
+        }
+        #top-artists-bar-count {
+            width: 60px;
+        }
+        #artists-bar-time-range, #bar-start-week {
+            width: 100px;
+            margin: 0 5px;
+        }
+        .artist-bar {
+            fill: #69b3d6; /* Light blue color like in the image */
+        }
+        .artists-bar-tooltip {
+            position: absolute;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            pointer-events: none;
+            font-size: 12px;
+            z-index: 1000;
+        }
+    `;
+    document.head.appendChild(styleElement);
+
+    // Create a standalone event handler for just this visualization
+    visualizationType.addEventListener('change', function(event) {
+        const value = event.target.value;
+        const topArtistsBarSection = document.getElementById('top-artists-bar-section');
+        
+        if (value === 'top-artists-bar') {
+            // Hide all visualization sections
+            const allSections = document.querySelectorAll('.visualization-section');
+            allSections.forEach(section => section.style.display = 'none');
+            
+            // Show only our section
+            topArtistsBarSection.style.display = 'block';
+            
+            // Initialize the chart if needed
+            if (!window.topArtistsBarChartInitialized) {
+                initTopArtistsBarChart();
+            }
+        } else {
+            // Hide our section when another visualization is selected
+            if (topArtistsBarSection) {
+                topArtistsBarSection.style.display = 'none';
+            }
+        }
+    });
+
+    // Global variable to track initialization - scoped to just this visualization
+    window.topArtistsBarChartInitialized = false;
+    
+    // Function to initialize top artists bar chart - completely self-contained
+    window.initTopArtistsBarChart = function() {
+        // Chart dimensions
+        const margin = {top: 50, right: 30, bottom: 120, left: 80};
+        const width = 900 - margin.left - margin.right;
+        const height = 600 - margin.top - margin.bottom;
+        
+        // Initialize tooltip specific to this visualization
+        let tooltip = d3.select("body").select(".artists-bar-tooltip");
+        if (tooltip.empty()) {
+            tooltip = d3.select("body")
+                .append("div")
+                .attr("class", "tooltip artists-bar-tooltip")
+                .style("opacity", 0);
+        }
+        
+        // Clear any existing content in the container
+        d3.select("#artists-bar-container").html("");
+        
+        // Create SVG
+        const svg = d3.select("#artists-bar-container")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+            
+        // Function to parse the stream count
+        function parseStreams(s) {
+            if (typeof s === 'string') {
+                return parseInt(s.replace(/,/g, ""));
+            }
+            return s;
+        }
+            
+        // Load song data
+        Promise.all([
+            d3.json("../data/Merge Data/all_songs.json"),
+            // You might want to add more data sources if needed
+        ]).then(([songsData]) => {
+            console.log("Songs data loaded for top artists bar chart:", songsData);
+                
+            // Process data
+            // Extract unique weeks from the data
+            const weeks = [...new Set(songsData.map(d => d.week))].sort();
+            
+            // Populate the start week dropdown
+            const startWeekSelect = d3.select("#bar-start-week");
+            startWeekSelect.selectAll("option").remove();
+            
+            weeks.forEach(week => {
+                startWeekSelect.append("option")
+                    .attr("value", week)
+                    .text(week);
+            });
+            
+            // Set a default start week
+            if (weeks.includes("2016-12-29")) {
+                startWeekSelect.property("value", "2016-12-29");
+            } else if (weeks.length > 0) {
+                startWeekSelect.property("value", weeks[0]);
+            }
+                
+            // Function to update chart
+            function updateChart() {
+                // Clear previous content
+                svg.selectAll("*").remove();
+                
+                // Get selected parameters
+                const startWeek = startWeekSelect.property("value");
+                const numWeeks = +d3.select("#artists-bar-time-range").property("value");
+                const topCount = +d3.select("#top-artists-bar-count").property("value");
+                
+                // Find the start week index and calculate the target weeks
+                const startIndex = weeks.indexOf(startWeek);
+                if (startIndex === -1 || startIndex + numWeeks > weeks.length) {
+                    svg.append("text")
+                        .attr("x", width / 2)
+                        .attr("y", height / 2)
+                        .attr("text-anchor", "middle")
+                        .text("Invalid date range selected");
+                    return;
+                }
+                
+                const targetWeeks = weeks.slice(startIndex, startIndex + numWeeks);
+                
+                // Filter data for the target weeks
+                const filteredData = songsData.filter(d => targetWeeks.includes(d.week));
+                
+                // Calculate artist streams
+                const artistStreamsTotal = {};
+                
+                filteredData.forEach(entry => {
+                    const streams = parseStreams(entry.streams);
+                    
+                    // Handle both single artist and multiple artists formats
+                    let artists = [];
+                    if (entry.artist) {
+                        // Split on commas and feat. to handle multiple artists
+                        artists = entry.artist.split(/,|feat\.|featuring/).map(a => a.trim());
+                    } else if (Array.isArray(entry.artists)) {
+                        artists = entry.artists;
+                    }
+                    
+                    artists.forEach(artist => {
+                        // Skip empty artists
+                        if (!artist) return;
+                        
+                        // Initialize if needed
+                        if (!artistStreamsTotal[artist]) {
+                            artistStreamsTotal[artist] = 0;
+                        }
+                        
+                        // Add to total streams
+                        artistStreamsTotal[artist] += streams;
+                    });
+                });
+                
+                // Sort artists by total streams and get the top ones
+                const topArtistData = Object.entries(artistStreamsTotal)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, topCount)
+                    .map(([artist, streams]) => ({ artist, streams }));
+                
+                if (topArtistData.length === 0) {
+                    svg.append("text")
+                        .attr("x", width / 2)
+                        .attr("y", height / 2)
+                        .attr("text-anchor", "middle")
+                        .text("No data available for the selected time period");
+                    return;
+                }
+                
+                // Create scales
+                const xScale = d3.scaleBand()
+                    .domain(topArtistData.map(d => d.artist))
+                    .range([0, width])
+                    .padding(0.2);
+                
+                const maxStreams = d3.max(topArtistData, d => d.streams);
+                const yScale = d3.scaleLinear()
+                    .domain([0, maxStreams * 1.1]) // Add 10% padding
+                    .range([height, 0]);
+                
+                // Create axes
+                const xAxis = svg.append("g")
+                    .attr("transform", `translate(0,${height})`)
+                    .call(d3.axisBottom(xScale));
+                
+                // Rotate x-axis labels if needed for longer artist names
+                xAxis.selectAll("text")
+                    .style("text-anchor", "end")
+                    .attr("dx", "-.8em")
+                    .attr("dy", ".15em")
+                    .attr("transform", "rotate(-45)");
+                
+                const yAxis = svg.append("g")
+                    .call(d3.axisLeft(yScale)
+                        .tickFormat(d => {
+                            if (d >= 1000000000) {
+                                return (d / 1000000000).toFixed(1) + 'B';
+                            } else if (d >= 1000000) {
+                                return (d / 1000000).toFixed(0) + 'M';
+                            } else if (d >= 1000) {
+                                return (d / 1000).toFixed(0) + 'K';
+                            }
+                            return d;
+                        }));
+                
+                // Add axis labels
+                svg.append("text")
+                    .attr("class", "axis-label")
+                    .attr("text-anchor", "middle")
+                    .attr("x", width / 2)
+                    .attr("y", height + margin.bottom - 40)
+                    .text("Artists");
+                
+                svg.append("text")
+                    .attr("class", "axis-label")
+                    .attr("text-anchor", "middle")
+                    .attr("transform", "rotate(-90)")
+                    .attr("x", -height / 2)
+                    .attr("y", -margin.left + 20)
+                    .text("Total Streams");
+                
+                // Add chart title
+                svg.append("text")
+                    .attr("class", "chart-title")
+                    .attr("text-anchor", "middle")
+                    .attr("x", width / 2)
+                    .attr("y", -20)
+                    .attr("font-size", "16px")
+                    .attr("font-weight", "bold")
+                    .text(`Top ${topCount} Artists by Total Streams (${numWeeks}-week period starting ${startWeek})`);
+                
+                // Draw bars
+                svg.selectAll(".artist-bar")
+                    .data(topArtistData)
+                    .enter()
+                    .append("rect")
+                    .attr("class", "artist-bar")
+                    .attr("x", d => xScale(d.artist))
+                    .attr("y", d => yScale(d.streams))
+                    .attr("width", xScale.bandwidth())
+                    .attr("height", d => height - yScale(d.streams))
+                    .on("mouseover", function(event, d) {
+                        tooltip.transition()
+                            .duration(200)
+                            .style("opacity", .9);
+                        tooltip.html(`
+                            <strong>${d.artist}</strong><br/>
+                            Total Streams: ${d.streams.toLocaleString()}
+                        `)
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY - 28) + "px");
+                    })
+                    .on("mouseout", function() {
+                        tooltip.transition()
+                            .duration(500)
+                            .style("opacity", 0);
+                    });
+            }
+            
+            // Initial chart
+            updateChart();
+            
+            // Add event listeners specific to this visualization
+            d3.select("#artists-bar-time-range").on("change", updateChart);
+            d3.select("#bar-start-week").on("change", updateChart);
+            d3.select("#top-artists-bar-count").on("change", updateChart);
+            
+            // Set flag indicating chart is initialized
+            window.topArtistsBarChartInitialized = true;
+            
+        }).catch(error => {
+            console.error("Error loading data for artists bar chart:", error);
+            d3.select("#artists-bar-container")
+                .append("p")
+                .text("Error loading data. Please make sure the all_songs.json file exists at data/Merge Data/all_songs.json");
+        });
+    };
+});
 
 
    </script>
