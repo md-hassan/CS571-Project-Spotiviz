@@ -49,9 +49,10 @@
         <nav class="sidebar">
             <button onclick="location.href='../index.html'">Overview</button>
             <button onclick="location.href='music_analytics.html'" class="active">Music Analytics</button>
-            <button onclick="location.href='podcast_analytics.html'">Podcast Analytics</button>
+            <!-- <button onclick="location.href='podcast_analytics.html'">Podcast Analytics</button> -->
+            <button onclick="location.href='genre_analytics.html'">Genre Analytics</button>
             <button onclick="location.href='kpi.html'">Key Performance Indicators</button>
-            <button onclick="location.href='settings.html'">Settings</button>
+            <button onclick="location.href='settings.html'">About us</button>
         </nav>
              
         <main class="content music-analytics-content">
@@ -59,7 +60,9 @@
                 <div class="control-group">
                     <label for="visualization-type">Visualization:</label>
                     <select id="visualization-type">
-                        <option value="listening-trends">Listening Trends</option>
+                        <!-- <option value="listening-trends">Listening Trends</option> -->
+                        <option value="">Select Visualization</option>
+                     
                         
                     </select>
                 </div>
@@ -96,7 +99,7 @@
             </div>
                      
             <!-- Original visualization section -->
-            <div id="listening-trends-section" class="visualization-section">
+            <!-- <div id="listening-trends-section" class="visualization-section">
                 <div class="visualization-container">
                     <h2 id="visualization-title">Listening Trends Over Time</h2>
                     <div id="chart-container">
@@ -107,7 +110,7 @@
                         <ul id="top-songs-list"></ul>
                     </div>
                 </div>
-            </div>
+            </div> -->
             
             <!-- Album trends visualization section (initially hidden) -->
             <div id="album-trends-section" class="visualization-section album-trends-container">
@@ -126,7 +129,7 @@
     </footer>
      
     <!-- Original JavaScript file -->
-    <script src="../music_analytics.js"></script>
+    <!-- <script src="../music_analytics.js"></script> -->
     
     <!-- Album trends JavaScript -->
     <script>
@@ -264,14 +267,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Modify the existing visualization type change handler
     visualizationType.addEventListener('change', function() {
-        const listeningTrendsSection = document.getElementById('listening-trends-section');
+        console.log("Selected visualization:", this.value);
+        // const listeningTrendsSection = document.getElementById('listening-trends-section');
         const albumTrendsSection = document.getElementById('album-trends-section');
         const rankMovementSection = document.getElementById('rank-movement-section');
         const yearlyMovementSection = document.getElementById('yearly-movement-section');
         const albumTrendsControls = document.querySelectorAll('.album-trends-control');
         
         // Hide all sections first
-        listeningTrendsSection.style.display = 'none';
+        // listeningTrendsSection.style.display = 'none';
         albumTrendsSection.style.display = 'none';
         rankMovementSection.style.display = 'none';
         yearlyMovementSection.style.display = 'none';
@@ -295,6 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
             yearlyMovementSection.style.display = 'block';
             // Initialize yearly movement chart if not already initialized
             if (!window.yearlyMovementChartInitialized) {
+               
                 initYearlyMovementChart();
             }
         } else {
@@ -307,6 +312,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Function to initialize yearly movement chart
     window.initYearlyMovementChart = function() {
+
         // Chart dimensions
         const margin = {top: 50, right: 120, bottom: 50, left: 220};
         const width = 900 - margin.left - margin.right;
@@ -593,22 +599,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 
                 // Add value labels
-                svg.selectAll(".value-label")
-                    .data(pageData)
-                    .enter()
-                    .append("text")
-                    .attr("class", "value-label")
-                    .attr("x", d => {
-                        const barEnd = d.movement < 0 ? 
-                            movementScale(d.movement) : 
-                            movementScale(d.movement);
-                        return d.movement < 0 ? barEnd - 20 : barEnd + 5;
-                    })
-                    .attr("y", d => albumScale(`${d.album} (${d.artist})`) + albumScale.bandwidth() / 2)
-                    .attr("dy", ".35em")
-                    .attr("text-anchor", d => d.movement < 0 ? "end" : "start")
-                    .text(d => (d.movement > 0 ? "+" : "") + d.movement.toFixed(1))
-                    .attr("fill", d => d.movement === 0 ? "#333" : "white");
+                // svg.selectAll(".value-label")
+                //     .data(pageData)
+                //     .enter()
+                //     .append("text")
+                //     .attr("class", "value-label")
+                //     .attr("x", d => {
+                //         const barEnd = d.movement < 0 ? 
+                //             movementScale(d.movement) : 
+                //             movementScale(d.movement);
+                //         return d.movement < 0 ? barEnd - 20 : barEnd + 5;
+                //     })
+                //     .attr("y", d => albumScale(`${d.album} (${d.artist})`) + albumScale.bandwidth() / 2)
+                //     .attr("dy", ".35em")
+                //     .attr("text-anchor", d => d.movement < 0 ? "end" : "start")
+                //     .text(d => (d.movement > 0 ? "+" : "") + d.movement.toFixed(1))
+                //     .attr("fill", d => d.movement === 0 ? "#333" : "white");
             }
             
             // Initialize chart
@@ -1185,6 +1191,7 @@ document.addEventListener('DOMContentLoaded', function() {
             pointer-events: none;
             font-size: 12px;
             z-index: 1000;
+            color: #000 !important;
         }
     `;
     document.head.appendChild(styleElement);
@@ -1545,6 +1552,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add the new option to the visualization type dropdown
     const visualizationType = document.getElementById('visualization-type');
     if (visualizationType) {
+        
         // Check if the option already exists
         if (!Array.from(visualizationType.options).some(opt => opt.value === 'top-artists-bar')) {
             const artistsBarsOption = document.createElement('option');
@@ -1892,3 +1900,4 @@ document.addEventListener('DOMContentLoaded', function() {
     
 </body>
 </html>
+

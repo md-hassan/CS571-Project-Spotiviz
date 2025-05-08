@@ -1,39 +1,56 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spotiviz - Analytics Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <header>
-        <div class="logo">
-            <img src="data/spotify_image.jpg" alt="Spotify Logo"> Spotiviz
-        </div>
-        <h1>Analytics Dashboard</h1>
-    </header>
- 
-    <div class="container">
-        <nav class="sidebar">
-            <!-- Changed to link back to index.html (home page) instead of overview.html -->
-            <button onclick="location.href='index.html'">Overview</button>
-            <button onclick="location.href='pages/music_analytics.html'">Music Analytics</button>
-            <button onclick="location.href='pages/podcast_analytics.html'">Podcast Analytics</button>
-            <button onclick="location.href='pages/kpi.html'">Key Performance Indicators</button>
-            <button onclick="location.href='pages/settings.html'">Settings</button>
-        </nav>
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Spotiviz - Analytics Dashboard</title> 
+    <link rel="stylesheet" href="styles.css"> 
+    <!-- D3.js for map visualization --> 
+    <script src="https://d3js.org/d3.v7.min.js"></script> 
+    <!-- TopoJSON for map data --> 
+    <script src="https://unpkg.com/topojson@3"></script> 
+</head> 
+<body> 
+    <header> 
+        <div class="logo"> 
+            <img src="data/spotify_image.jpg" alt="Spotify Logo"> Spotiviz 
+        </div> 
+        <h1>Analytics Dashboard</h1> 
+    </header> 
+    
+    <div class="container"> 
+        <nav class="sidebar"> 
+            <button class="active" onclick="location.href='index.html'">Overview</button> 
+            <button onclick="location.href='pages/music_analytics.html'">Music Analytics</button> 
+            <button onclick="location.href='pages/genre_analytics.html'">Genre Analytics</button> 
+            <button onclick="location.href='pages/kpi.html'">Key Performance Indicators</button> 
+            <button onclick="location.href='pages/settings.html'">About us</button> 
+        </nav> 
         
-        <main class="content">
-            <!-- Google Maps iframe -->
-            <iframe id="map-iframe" src="https://www.google.com/maps/d/u/1/embed?mid=17y6YfCMUJgYbfpcaJwtRRz0p7x_hPyA&ehbc=2E312F" width="100%" height="100%" frameborder="0" style="border:0;" allowfullscreen="" aria-hidden="false" tabindex="0"></iframe>
-        </main>
-    </div>
+        <main class="content"> 
+            <div class="map-container"> 
+                <h2>Spotify Availability Worldwide</h2> 
+                <div id="world-map"></div> 
+                <div class="map-legend"> 
+                    <div class="legend-item"> 
+                        <div class="color-box available"></div> 
+                        <span>Spotify Available</span> 
+                    </div> 
+                    <div class="legend-item"> 
+                        <div class="color-box unavailable"></div> 
+                        <span>Spotify Unavailable</span> 
+                    </div> 
+                </div> 
+                <div id="tooltip" class="tooltip"></div> 
+            </div> 
+        </main> 
+    </div> 
     
-    <footer>
-        @ 2025 Spotify Analytics Dashboard
-    </footer>
+    <footer> 
+        @ 2025 Spotify Analytics Dashboard 
+    </footer> 
     
-    <script src="script.js"></script>
-</body>
+    <script src="world-map.js"></script> 
+    <script src="script.js"></script> 
+</body> 
 </html>

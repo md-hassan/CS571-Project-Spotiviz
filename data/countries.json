@@ -1,0 +1,713 @@
+[
+    {
+     "Countries": "Algeria"
+    },
+    {
+     "Countries": "Angola"
+    },
+    {
+     "Countries": "Benin"
+    },
+    {
+     "Countries": "Botswana"
+    },
+    {
+     "Countries": "Burkina Faso"
+    },
+    {
+     "Countries": "Burundi"
+    },
+    {
+     "Countries": "Cameroon"
+    },
+    {
+     "Countries": "Cape Verde"
+    },
+    {
+     "Countries": "Chad"
+    },
+    {
+     "Countries": "Comoros"
+    },
+    {
+     "Countries": "Côte d'Ivoire"
+    },
+    {
+     "Countries": "Democratic Republic of the Congo"
+    },
+    {
+     "Countries": "Djibouti"
+    },
+    {
+     "Countries": "Egypt"
+    },
+    {
+     "Countries": "Ethiopia"
+    },
+    {
+     "Countries": "Equatorial Guinea"
+    },
+    {
+     "Countries": "Eswatini"
+    },
+    {
+     "Countries": "Gabon"
+    },
+    {
+     "Countries": "Gambia"
+    },
+    {
+     "Countries": "Ghana"
+    },
+    {
+     "Countries": "Guinea"
+    },
+    {
+     "Countries": "Guinea-Bissau"
+    },
+    {
+     "Countries": "Kenya"
+    },
+    {
+     "Countries": "Lesotho"
+    },
+    {
+     "Countries": "Liberia"
+    },
+    {
+     "Countries": "Libya"
+    },
+    {
+     "Countries": "Madagascar"
+    },
+    {
+     "Countries": "Malawi"
+    },
+    {
+     "Countries": "Mali"
+    },
+    {
+     "Countries": "Mauritania"
+    },
+    {
+     "Countries": "Mauritius"
+    },
+    {
+     "Countries": "Morocco"
+    },
+    {
+     "Countries": "Mozambique"
+    },
+    {
+     "Countries": "Namibia"
+    },
+    {
+     "Countries": "Niger"
+    },
+    {
+     "Countries": "Nigeria"
+    },
+    {
+     "Countries": "Republic of the Congo"
+    },
+    {
+     "Countries": "Rwanda"
+    },
+    {
+     "Countries": "São Tomé and Príncipe"
+    },
+    {
+     "Countries": "Senegal"
+    },
+    {
+     "Countries": "Seychelles"
+    },
+    {
+     "Countries": "Sierra Leone"
+    },
+    {
+     "Countries": "South Africa"
+    },
+    {
+     "Countries": "Tanzania"
+    },
+    {
+     "Countries": "Togo"
+    },
+    {
+     "Countries": "Tunisia"
+    },
+    {
+     "Countries": "Uganda"
+    },
+    {
+     "Countries": "Zambia"
+    },
+    {
+     "Countries": "Zimbabwe"
+    },
+    {
+     "Countries": "Armenia"
+    },
+    {
+     "Countries": "Azerbaijan"
+    },
+    {
+     "Countries": "Bahrain"
+    },
+    {
+     "Countries": "Bangladesh"
+    },
+    {
+     "Countries": "Bhutan"
+    },
+    {
+     "Countries": "Brunei Darussalam"
+    },
+    {
+     "Countries": "Cambodia"
+    },
+    {
+     "Countries": "Georgia"
+    },
+    {
+     "Countries": "Hong Kong"
+    },
+    {
+     "Countries": "India"
+    },
+    {
+     "Countries": "Indonesia"
+    },
+    {
+     "Countries": "Iraq"
+    },
+    {
+     "Countries": "Israel"
+    },
+    {
+     "Countries": "Japan"
+    },
+    {
+     "Countries": "Jordan"
+    },
+    {
+     "Countries": "Kuwait"
+    },
+    {
+     "Countries": "Kyrgyzstan"
+    },
+    {
+     "Countries": "Lao People's Democratic Republic"
+    },
+    {
+     "Countries": "Lebanon"
+    },
+    {
+     "Countries": "Macao"
+    },
+    {
+     "Countries": "Malaysia"
+    },
+    {
+     "Countries": "Maldives"
+    },
+    {
+     "Countries": "Mongolia"
+    },
+    {
+     "Countries": "Nepal"
+    },
+    {
+     "Countries": "Oman"
+    },
+    {
+     "Countries": "Pakistan"
+    },
+    {
+     "Countries": "Palestine"
+    },
+    {
+     "Countries": "Philippines"
+    },
+    {
+     "Countries": "Qatar"
+    },
+    {
+     "Countries": "Saudi Arabia"
+    },
+    {
+     "Countries": "Singapore"
+    },
+    {
+     "Countries": "South Korea"
+    },
+    {
+     "Countries": "Sri Lanka"
+    },
+    {
+     "Countries": "Taiwan"
+    },
+    {
+     "Countries": "Tajikistan"
+    },
+    {
+     "Countries": "Thailand"
+    },
+    {
+     "Countries": "Timor-Leste"
+    },
+    {
+     "Countries": "United Arab Emirates"
+    },
+    {
+     "Countries": "Uzbekistan"
+    },
+    {
+     "Countries": "Vietnam"
+    },
+    {
+     "Countries": "Åland"
+    },
+    {
+     "Countries": "Albania"
+    },
+    {
+     "Countries": "Andorra"
+    },
+    {
+     "Countries": "Anguilla"
+    },
+    {
+     "Countries": "Ascension"
+    },
+    {
+     "Countries": "Austria"
+    },
+    {
+     "Countries": "Azores"
+    },
+    {
+     "Countries": "Balearic Islands"
+    },
+    {
+     "Countries": "Belarus"
+    },
+    {
+     "Countries": "Belgium"
+    },
+    {
+     "Countries": "Bermuda"
+    },
+    {
+     "Countries": "Bosnia"
+    },
+    {
+     "Countries": "British Virgin Islands"
+    },
+    {
+     "Countries": "Bulgaria"
+    },
+    {
+     "Countries": "Canary Islands"
+    },
+    {
+     "Countries": "Cayman Islands"
+    },
+    {
+     "Countries": "Ceuta"
+    },
+    {
+     "Countries": "Croatia"
+    },
+    {
+     "Countries": "Cyprus"
+    },
+    {
+     "Countries": "Czech Republic"
+    },
+    {
+     "Countries": "Denmark"
+    },
+    {
+     "Countries": "Estonia"
+    },
+    {
+     "Countries": "Falkland Islands"
+    },
+    {
+     "Countries": "Faroe Islands"
+    },
+    {
+     "Countries": "Finland"
+    },
+    {
+     "Countries": "France"
+    },
+    {
+     "Countries": "French Guiana"
+    },
+    {
+     "Countries": "French Polynesia"
+    },
+    {
+     "Countries": "Germany"
+    },
+    {
+     "Countries": "Gibraltar"
+    },
+    {
+     "Countries": "Greece"
+    },
+    {
+     "Countries": "Greenland"
+    },
+    {
+     "Countries": "Guadeloupe"
+    },
+    {
+     "Countries": "Guernsey"
+    },
+    {
+     "Countries": "Hungary"
+    },
+    {
+     "Countries": "Iceland"
+    },
+    {
+     "Countries": "Ireland"
+    },
+    {
+     "Countries": "Isle of Man"
+    },
+    {
+     "Countries": "Italy"
+    },
+    {
+     "Countries": "Jersey"
+    },
+    {
+     "Countries": "Kazakhstan"
+    },
+    {
+     "Countries": "Kosovo"
+    },
+    {
+     "Countries": "Latvia"
+    },
+    {
+     "Countries": "Liechtenstein"
+    },
+    {
+     "Countries": "Lithuania"
+    },
+    {
+     "Countries": "Luxembourg"
+    },
+    {
+     "Countries": "Madeira"
+    },
+    {
+     "Countries": "Malta"
+    },
+    {
+     "Countries": "Martinique"
+    },
+    {
+     "Countries": "Mayotte"
+    },
+    {
+     "Countries": "Melilla"
+    },
+    {
+     "Countries": "Moldova"
+    },
+    {
+     "Countries": "Monaco"
+    },
+    {
+     "Countries": "Montenegro"
+    },
+    {
+     "Countries": "Montserrat"
+    },
+    {
+     "Countries": "Netherlands"
+    },
+    {
+     "Countries": "New Caledonia"
+    },
+    {
+     "Countries": "North Macedonia"
+    },
+    {
+     "Countries": "Norway"
+    },
+    {
+     "Countries": "Pitcairn Islands"
+    },
+    {
+     "Countries": "Poland"
+    },
+    {
+     "Countries": "Portugal"
+    },
+    {
+     "Countries": "Romania"
+    },
+    {
+     "Countries": "Réunion"
+    },
+    {
+     "Countries": "Saint Barthélemy"
+    },
+    {
+     "Countries": "Saint Helena"
+    },
+    {
+     "Countries": "Saint Martin"
+    },
+    {
+     "Countries": "Saint Pierre and Miquelon"
+    },
+    {
+     "Countries": "San Marino"
+    },
+    {
+     "Countries": "Serbia"
+    },
+    {
+     "Countries": "Slovakia"
+    },
+    {
+     "Countries": "Slovenia"
+    },
+    {
+     "Countries": "Spain"
+    },
+    {
+     "Countries": "Svalbard"
+    },
+    {
+     "Countries": "Sweden"
+    },
+    {
+     "Countries": "Switzerland"
+    },
+    {
+     "Countries": "Tristan da Cunha"
+    },
+    {
+     "Countries": "Turkey"
+    },
+    {
+     "Countries": "Turks and Caicos Islands"
+    },
+    {
+     "Countries": "Ukraine"
+    },
+    {
+     "Countries": "United Kingdom"
+    },
+    {
+     "Countries": "Wallis and Futuna"
+    },
+    {
+     "Countries": "American Samoa"
+    },
+    {
+     "Countries": "Antigua and Barbuda"
+    },
+    {
+     "Countries": "Bahamas"
+    },
+    {
+     "Countries": "Barbados"
+    },
+    {
+     "Countries": "Belize"
+    },
+    {
+     "Countries": "Canada"
+    },
+    {
+     "Countries": "Costa Rica"
+    },
+    {
+     "Countries": "Curaçao"
+    },
+    {
+     "Countries": "Dominica"
+    },
+    {
+     "Countries": "Dominican Republic"
+    },
+    {
+     "Countries": "El Salvador"
+    },
+    {
+     "Countries": "Grenada"
+    },
+    {
+     "Countries": "Guam"
+    },
+    {
+     "Countries": "Guatemala"
+    },
+    {
+     "Countries": "Haiti"
+    },
+    {
+     "Countries": "Honduras"
+    },
+    {
+     "Countries": "Jamaica"
+    },
+    {
+     "Countries": "Mexico"
+    },
+    {
+     "Countries": "Nicaragua"
+    },
+    {
+     "Countries": "Northern Mariana Islands"
+    },
+    {
+     "Countries": "Panama"
+    },
+    {
+     "Countries": "Puerto Rico"
+    },
+    {
+     "Countries": "St. Kitts and Nevis"
+    },
+    {
+     "Countries": "St. Lucia"
+    },
+    {
+     "Countries": "St. Vincent and the Grenadines"
+    },
+    {
+     "Countries": "Trinidad and Tobago"
+    },
+    {
+     "Countries": "United States of America"
+    },
+    {
+     "Countries": "United States Minor Outlying Islands (Navassa Island, Baker Island, Howland Island, Jarvis Island, Johnston Atoll, Kingman Reef, Midway Atoll, Wake Atoll)"
+    },
+    {
+     "Countries": "United States Virgin Islands"
+    },
+    {
+     "Countries": "Argentina"
+    },
+    {
+     "Countries": "Aruba"
+    },
+    {
+     "Countries": "Bolivia"
+    },
+    {
+     "Countries": "Brazil"
+    },
+    {
+     "Countries": "Chile"
+    },
+    {
+     "Countries": "Colombia"
+    },
+    {
+     "Countries": "Ecuador"
+    },
+    {
+     "Countries": "Guyana"
+    },
+    {
+     "Countries": "Paraguay"
+    },
+    {
+     "Countries": "Peru"
+    },
+    {
+     "Countries": "Sint Maarten"
+    },
+    {
+     "Countries": "Suriname"
+    },
+    {
+     "Countries": "Uruguay"
+    },
+    {
+     "Countries": "Venezuela"
+    },
+    {
+     "Countries": "Australia"
+    },
+    {
+     "Countries": "Bonaire"
+    },
+    {
+     "Countries": "Christmas Island"
+    },
+    {
+     "Countries": "Cocos (Keeling) Islands"
+    },
+    {
+     "Countries": "Cook Islands"
+    },
+    {
+     "Countries": "Fiji"
+    },
+    {
+     "Countries": "Kiribati"
+    },
+    {
+     "Countries": "Marshall Islands"
+    },
+    {
+     "Countries": "Micronesia"
+    },
+    {
+     "Countries": "Nauru"
+    },
+    {
+     "Countries": "New Zealand"
+    },
+    {
+     "Countries": "Niue"
+    },
+    {
+     "Countries": "Norfolk Island"
+    },
+    {
+     "Countries": "Palau"
+    },
+    {
+     "Countries": "Papua New Guinea"
+    },
+    {
+     "Countries": "Saba"
+    },
+    {
+     "Countries": "Samoa"
+    },
+    {
+     "Countries": "Sint Eustatius"
+    },
+    {
+     "Countries": "Solomon Islands"
+    },
+    {
+     "Countries": "Tokelau"
+    },
+    {
+     "Countries": "Tonga"
+    },
+    {
+     "Countries": "Tuvalu"
+    },
+    {
+     "Countries": "Vanuatu"
+    }
+   ]

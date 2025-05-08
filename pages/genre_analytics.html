@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+ <title>Spotiviz - Analytics</title>
+ <link rel="stylesheet" href="../styles.css" />
+ <script src="https://d3js.org/d3.v7.min.js"></script>
+ <style>
+   #charts {
+     display: flex;
+     flex-wrap: wrap;
+     gap: 30px;
+     margin-top: 20px;
+     justify-content: center;
+   }
+   select {
+     margin: 0 10px 10px 0;
+     padding: 5px;
+     padding: 5px;
+     width: 200px;       
+     max-width: 100%;
+   }
+   svg {
+     background-color: #fff;
+   }
+ </style>
+</head>
+<body>
+ <header>
+   <div class="logo">
+     <img src="../data/spotify_image.jpg" alt="Spotify Logo" /> Spotiviz
+   </div>
+   <h1>Analytics Dashboard</h1>
+ </header>
+
+
+ <div class="container">
+   <nav class="sidebar">
+     <button onclick="location.href='../index.html'">Overview</button>
+     <button onclick="location.href='music_analytics.html'">Music Analytics</button>
+     <button onclick="location.href='genre_analytics.html'" class="active">Genre Analytics</button>
+     <button onclick="location.href='kpi.html'">Key Performance Indicators</button>
+     <button onclick="location.href='settings.html'">About us</button>
+   </nav>
+
+
+   <main class="content genre-analytics-content">
+     <h2>Genre Analytics</h2>
+
+
+     <label for="genreSelect">Select Genre:</label>
+     <select id="genreSelect"></select>
+
+
+     <label for="rangeSelect">Select Time Range:</label>
+     <select id="rangeSelect">
+       <option value="3">Last 3 Months</option>
+       <option value="6">Last 6 Months</option>
+       <option value="12">Last 1 Year</option>
+       <option value="all">All Time</option>
+     </select>
+
+
+     <div id="charts">
+       <svg id="lineChart" width="500" height="350"></svg>
+       <svg id="barChart" width="500" height="350"></svg>
+     </div>
+   </main>
+ </div>
+
+
+ <footer>
+   @ 2025 Spotify Analytics Dashboard
+ </footer>
+
+
+ <script>
+   const parseDate = d3.timeParse("%Y-%m-%d");
+   const formatDate = d3.timeFormat("%Y-%m-%d");
+
+
+   let weeklyData, viralData, allDates, allGenres;
+
+
+   Promise.all([
+     d3.json("../data/songs-global-weekly.json"),
+     d3.json("../data/viral-global-daily.json")
+   ]).then(([weekly, viral]) => {
+     weeklyData = weekly;
+     viralData = viral;
+     allGenres = Object.keys(Object.values(weeklyData)[0]);
+     allDates = Object.keys(weeklyData).map(parseDate).sort((a, b) => a - b);
+
+
+     const genreSelect = d3.select("#genreSelect");
+     genreSelect.selectAll("option")
+       .data(allGenres)
+       .enter()
+       .append("option")
+       .text(d => d)
+       .attr("value", d => d);
+
+
+     genreSelect.on("change", updateCharts);
+     d3.select("#rangeSelect").on("change", updateCharts);
+
+
+     updateCharts();
+   });
+
+
+   function getFilteredDates(range) {
+     const today = new Date();
+     if (range === "all") return allDates;
+     const monthsAgo = new Date(today.setMonth(today.getMonth() - parseInt(range)));
+     return allDates.filter(d => d >= monthsAgo);
+   }
+
+
+   function updateCharts() {
+     const selectedGenre = d3.select("#genreSelect").property("value") || allGenres[0];
+     const range = d3.select("#rangeSelect").property("value") || "3";
+     const filteredDates = getFilteredDates(range);
+     const formattedDates = filteredDates.map(formatDate);
+
+
+     const lineData = formattedDates.map(date => ({
+       date: parseDate(date),
+       streams: weeklyData[date]?.[selectedGenre] || 0
+     }));
+
+
+     drawLineChart(lineData);
+
+
+     const genreCounts = {};
+     formattedDates.forEach(date => {
+       if (viralData[date]) {
+         for (let genre in viralData[date]) {
+           if (!genreCounts[genre]) genreCounts[genre] = 0;
+           if (viralData[date][genre] > 0) genreCounts[genre]++;
+         }
+       }
+     });
+
+
+     const barData = Object.entries(genreCounts).map(([genre, count]) => ({ genre, count }));
+     drawBarChart(barData, selectedGenre);
+   }
+
+
+   function drawLineChart(data) {
+   const svg = d3.select("#lineChart");
+   svg.selectAll("*").remove();
+
+
+   const margin = { top: 20, right: 20, bottom: 70, left: 85 },
+           width = +svg.attr("width") - margin.left - margin.right,
+           height = +svg.attr("height") - margin.top - margin.bottom;
+
+
+   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+
+   const x = d3.scaleTime().domain(d3.extent(data, d => d.date)).range([0, width]);
+   const y = d3.scaleLinear().domain([0, d3.max(data, d => d.streams)]).range([height, 0]);
+
+
+   // Detect selected range for smart formatting
+   const range = d3.select("#rangeSelect").property("value");
+   let tickFormat;
+   if (range === "3" || range === "6") {
+       tickFormat = d3.timeFormat("%b %d"); // Month Day
+   } else if (range === "12") {
+       tickFormat = d3.timeFormat("%b"); // Month
+   } else {
+       tickFormat = d3.timeFormat("%Y"); // Year
+   }
+
+
+   g.append("g")
+       .attr("transform", `translate(0,${height})`)
+       .call(d3.axisBottom(x).tickFormat(tickFormat))
+       .selectAll("text")
+       .attr("text-size","12px")
+       .attr("transform", "rotate(-45)")
+       .style("text-anchor", "end");
+
+
+   g.append("g").call(d3.axisLeft(y));
+
+
+   // Axis labels
+   g.append("text")
+       .attr("x", width / 2)
+       .attr("y", height + 60)
+       .attr("text-anchor", "middle")
+       .text("Date");
+
+
+   g.append("text")
+       .attr("transform", "rotate(-90)")
+       .attr("x", -height / 2)
+       .attr("y", -75)
+       .attr("text-anchor", "middle")
+       .attr("font-size","12px")
+       .text("Stream Count");
+      
+
+
+   const line = d3.line().x(d => x(d.date)).y(d => y(d.streams));
+
+
+   g.append("path")
+       .datum(data)
+       .attr("fill", "none")
+       .attr("stroke", "steelblue")
+       .attr("stroke-width", 2)
+       .attr("d", line);
+   }
+
+
+
+
+   function drawBarChart(data, selectedGenre) {
+     const svg = d3.select("#barChart");
+     svg.selectAll("*").remove();
+
+
+     const margin = { top: 20, right: 20, bottom: 90, left: 60 },
+           width = +svg.attr("width") - margin.left - margin.right,
+           height = +svg.attr("height") - margin.top - margin.bottom;
+
+
+     const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+
+     const x = d3.scaleBand().domain(data.map(d => d.genre)).range([0, width]).padding(0.2);
+     const y = d3.scaleLinear().domain([0, d3.max(data, d => d.count)]).range([height, 0]);
+
+
+     g.append("g")
+       .attr("transform", `translate(0,${height})`)
+       .call(d3.axisBottom(x))
+       .selectAll("text")
+       .attr("transform", "rotate(-45)")
+       .attr("text-size","12px")
+       .style("text-anchor", "end");
+
+
+     g.append("g").call(d3.axisLeft(y));
+
+
+     svg.append("text")
+       .attr("x", margin.left + width / 2)
+       .attr("y", height + margin.top + 80)
+       .attr("text-anchor", "middle")
+       .attr("font-size", "12px")
+       .text("Genre");
+
+
+     svg.append("text")
+       .attr("transform", "rotate(-90)")
+       .attr("x", -margin.top - height / 2)
+       .attr("y", 20)
+       .attr("text-anchor", "middle")
+       .attr("font-size", "12px")
+       .text("Number of Appearances in Top 100");
+
+
+     g.selectAll("rect")
+       .data(data)
+       .enter()
+       .append("rect")
+       .attr("x", d => x(d.genre))
+       .attr("y", d => y(d.count))
+       .attr("width", x.bandwidth())
+       .attr("height", d => height - y(d.count))
+       .attr("fill", d => d.genre === selectedGenre ? "#ff6600" : "#ccc");
+   }
+ </script>
+
+
+ <script src="../script.js"></script>
+</body>
+</html>
+
+
+
