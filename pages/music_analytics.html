@@ -1286,7 +1286,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Filter data by time range
                 let filteredData = [...data];
                 if (timeRange !== 'all') {
-                    const currentDate = new Date();
+                    // const currentDate = new Date();
+                    const currentDate = new Date(filteredData[filteredData.length - 1].week);
                     let cutoffDate;
                     
                     if (timeRange === 'last-year') {

@@ -84,7 +84,7 @@ Promise.all([
 });
 
 function getFilteredDates(Dates, range) {
-    const today = new Date();
+    const today = new Date(Math.max(...Dates));
     if (range === "all") return Dates;
     const monthsAgo = new Date(today.setMonth(today.getMonth() - parseInt(range)));
     return Dates.filter(d => d >= monthsAgo);
