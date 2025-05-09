@@ -838,9 +838,9 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr("transform", `translate(${margin.left},${margin.top})`);
             
         // Color scale - use a predefined color scheme
-        const colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", 
-                       "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"];
-        const colorScale = d3.scaleOrdinal(colors);
+        // const colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", 
+        //                "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"];
+        // const colorScale = d3.scaleOrdinal(colors);
         
         // Function to parse the stream count
         function parseStreams(s) {
@@ -949,7 +949,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Prepare the data for plotting
                 const plotData = [];
-                
+
+                var colorScale = d3.scaleOrdinal()
+                .domain(topArtists)
+                .range(d3.range(topArtists.length).map(i => d3.interpolateTurbo(i / topArtists.length)));                
+
                 topArtists.forEach(artist => {
                     targetWeeks.forEach(week => {
                         plotData.push({
