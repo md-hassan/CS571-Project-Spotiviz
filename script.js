@@ -51,9 +51,9 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     async function fetchAndStoreData() {
         try {
-            const albumRes = await fetch('../data/all_albums.json');
-            const artistRes = await fetch('../data/all_artists.json');
-            const songRes = await fetch('../data/all_songs.json');
+            const albumRes = await fetch('../data/merge_data/all_albums.json');
+            const artistRes = await fetch('../data/merge_data/all_artists.json');
+            const songRes = await fetch('../data/merge_data/all_songs.json');
 
             albums = await albumRes.json();
             artists = await artistRes.json();
@@ -76,6 +76,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         const weeks = Array.from(weekSet).sort().reverse(); // latest first
 
         const select = document.getElementById("weekSelect");
+        if (!select) return;    
         select.innerHTML = "";
 
         weeks.forEach(week => {

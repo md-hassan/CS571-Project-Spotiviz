@@ -50,7 +50,18 @@
             <button onclick="location.href='../index.html'">Overview</button>
             <button onclick="location.href='music_analytics.html'" class="active">Music Analytics</button>
             <!-- <button onclick="location.href='podcast_analytics.html'">Podcast Analytics</button> -->
-            <button onclick="location.href='genre_analytics.html'">Genre Analytics</button>
+            <!-- <button onclick="location.href='genre_analytics.html'">Genre Analytics</button> -->
+            <div class="sidebar-dropdown">
+                <button class="sidebar-dropbtn"><center>Genre Analytics ▾ </center></button>
+                <div class="sidebar-dropdown-content">
+                  <a href="genre_analytics.html">Global</a>
+                  <a href="genre_analytics_local.html?city=chicago">Chicago</a>
+                  <a href="genre_analytics_local.html?city=losangeles">Los Angeles</a>
+                  <a href="genre_analytics_local.html?city=mexicocity">Mexico City</a>
+                  <a href="genre_analytics_local.html?city=newyorkcity">New York City</a>
+                  <a href="genre_analytics_local.html?city=toronto">Toronto</a>
+                </div>
+              </div>
             <button onclick="location.href='kpi.html'">Key Performance Indicators</button>
             <button onclick="location.href='settings.html'">About us</button>
         </nav>
@@ -72,7 +83,7 @@
                         <option value="all">All Artists</option>
                     </select>
                 </div>
-                <div class="control-group">
+                <!-- <div class="control-group">
                     <label for="time-range">Time Range:</label>
                     <select id="time-range">
                         <option value="all">All Time</option>
@@ -91,11 +102,10 @@
                     </select>
                 </div>
                 
-                <!-- Album trends specific controls (hidden by default) -->
                 <div class="control-group album-trends-control">
                     <label for="top-albums">Top Albums:</label>
                     <input type="number" id="top-albums" min="1" max="20" value="5">
-                </div>
+                </div> -->
             </div>
                      
             <!-- Original visualization section -->
@@ -303,7 +313,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 initYearlyMovementChart();
             }
         } else {
-            listeningTrendsSection.style.display = 'block';
+            // listeningTrendsSection.style.display = 'block';
         }
     });
 
@@ -340,7 +350,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const entriesPerPage = 20; // Default
         
         // Load data
-        d3.json("../data/Merge Data/all_albums.json").then(data => {
+        d3.json("../data/merge_data/all_albums.json").then(data => {
             console.log("Data loaded for yearly movement chart:", data);
             
             // Process data - convert ranks to numbers
@@ -692,7 +702,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error("Error loading album data for yearly movement chart:", error);
             d3.select("#yearly-movement-container")
                 .append("p")
-                .text("Error loading data. Please make sure the merged album data file exists at data/Merge Data/all_albums.json");
+                .text("Error loading data. Please make sure the merged album data file exists at data/merge_data/all_albums.json");
         });
     }
 });
@@ -842,7 +852,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
         // Load song data
         Promise.all([
-            d3.json("../data/Merge Data/all_songs.json"),
+            d3.json("../data/merge_data/all_songs.json"),
             // You might want to add more data sources if needed
         ]).then(([songsData]) => {
             console.log("Songs data loaded for top artists streams chart:", songsData);
@@ -1043,33 +1053,33 @@ document.addEventListener('DOMContentLoaded', function() {
                         .attr("stroke", colorScale(artist))
                         .attr("stroke-width", 2);
                     
-                    // Add dots for each data point
-                    svg.selectAll(`.artist-dot-${i}`)
-                        .data(artistData)
-                        .enter()
-                        .append("circle")
-                        .attr("class", "artist-dot")
-                        .attr("cx", d => xScale(d.week) + xScale.bandwidth() / 2)
-                        .attr("cy", d => yScale(d.streams))
-                        .attr("r", 5)
-                        .attr("fill", colorScale(artist))
-                        .on("mouseover", function(event, d) {
-                            tooltip.transition()
-                                .duration(200)
-                                .style("opacity", .9);
-                            tooltip.html(`
-                                <strong>${d.artist}</strong><br/>
-                                Week: ${d.week}<br/>
-                                Streams: ${d.streams.toLocaleString()}
-                            `)
-                            .style("left", (event.pageX + 10) + "px")
-                            .style("top", (event.pageY - 28) + "px");
-                        })
-                        .on("mouseout", function() {
-                            tooltip.transition()
-                                .duration(500)
-                                .style("opacity", 0);
-                        });
+                    // // Add dots for each data point
+                    // svg.selectAll(`.artist-dot-${i}`)
+                    //     .data(artistData)
+                    //     .enter()
+                    //     .append("circle")
+                    //     .attr("class", "artist-dot")
+                    //     .attr("cx", d => xScale(d.week) + xScale.bandwidth() / 2)
+                    //     .attr("cy", d => yScale(d.streams))
+                    //     .attr("r", 5)
+                    //     .attr("fill", colorScale(artist))
+                    //     .on("mouseover", function(event, d) {
+                    //         tooltip.transition()
+                    //             .duration(200)
+                    //             .style("opacity", .9);
+                    //         tooltip.html(`
+                    //             <strong>${d.artist}</strong><br/>
+                    //             Week: ${d.week}<br/>
+                    //             Streams: ${d.streams.toLocaleString()}
+                    //         `)
+                    //         .style("left", (event.pageX + 10) + "px")
+                    //         .style("top", (event.pageY - 28) + "px");
+                    //     })
+                    //     .on("mouseout", function() {
+                    //         tooltip.transition()
+                    //             .duration(500)
+                    //             .style("opacity", 0);
+                    //     });
                 });
                 
                 // Add legend
@@ -1108,7 +1118,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error("Error loading data for artists streams chart:", error);
             d3.select("#artists-streams-container")
                 .append("p")
-                .text("Error loading data. Please make sure the all_songs.json file exists at data/Merge Data/all_songs.json");
+                .text("Error loading data. Please make sure the all_songs.json file exists at data/merge_data/all_songs.json");
         });
     };
 });
@@ -1249,7 +1259,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr("transform", `translate(${margin.left},${margin.top})`);
         
         // Load data
-        d3.json("../data/Merge Data/all_artists.json").then(data => {
+        d3.json("../data/merge_data/all_artists.json").then(data => {
             console.log("Data loaded for artist heatmap:", data);
             
             // Process data
@@ -1543,7 +1553,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error("Error loading artist data for heatmap:", error);
             d3.select("#artist-heatmap-container")
                 .append("p")
-                .text("Error loading data. Please make sure the merged artist data file exists at data/Merge Data/all_artists.json");
+                .text("Error loading data. Please make sure the merged artist data file exists at data/merge_data/all_artists.json");
         });
     }
 });
@@ -1687,7 +1697,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
         // Load song data
         Promise.all([
-            d3.json("../data/Merge Data/all_songs.json"),
+            d3.json("../data/merge_data/all_songs.json"),
             // You might want to add more data sources if needed
         ]).then(([songsData]) => {
             console.log("Songs data loaded for top artists bar chart:", songsData);
@@ -1888,7 +1898,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error("Error loading data for artists bar chart:", error);
             d3.select("#artists-bar-container")
                 .append("p")
-                .text("Error loading data. Please make sure the all_songs.json file exists at data/Merge Data/all_songs.json");
+                .text("Error loading data. Please make sure the all_songs.json file exists at data/merge_data/all_songs.json");
         });
     };
 });

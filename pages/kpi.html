@@ -20,7 +20,18 @@
        <nav class="sidebar">
            <button onclick="location.href='../index.html'">Overview</button>
            <button onclick="location.href='music_analytics.html'">Music Analytics</button>
-           <button onclick="location.href='genre_analytics.html'">Genre Analytics</button>
+           <!-- <button onclick="location.href='genre_analytics.html'">Genre Analytics</button> -->
+           <div class="sidebar-dropdown">
+            <button class="sidebar-dropbtn"><center>Genre Analytics ▾ </center></button>
+            <div class="sidebar-dropdown-content">
+              <a href="genre_analytics.html">Global</a>
+              <a href="genre_analytics_local.html?city=chicago">Chicago</a>
+              <a href="genre_analytics_local.html?city=losangeles">Los Angeles</a>
+              <a href="genre_analytics_local.html?city=mexicocity">Mexico City</a>
+              <a href="genre_analytics_local.html?city=newyorkcity">New York City</a>
+              <a href="genre_analytics_local.html?city=toronto">Toronto</a>
+            </div>
+          </div>
            <button class="active" onclick="location.href='kpi.html'">Key Performance Indicators</button>
            <button onclick="location.href='settings.html'">About us</button>
        </nav>

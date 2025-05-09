@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+ <title>Spotiviz - Analytics</title>
+ <link rel="stylesheet" href="../styles.css" />
+ <script src="https://d3js.org/d3.v7.min.js"></script>
+ <style>
+   #charts {
+     display: flex;
+     flex-wrap: wrap;
+     gap: 30px;
+     margin-top: 20px;
+     justify-content: center;
+   }
+   select {
+     margin: 0 10px 10px 0;
+     padding: 5px;
+     padding: 5px;
+     width: 200px;       
+     max-width: 100%;
+   }
+   svg {
+     background-color: #fff;
+   }
+ </style>
+</head>
+<body>
+ <header>
+   <div class="logo">
+     <img src="../data/spotify_image.jpg" alt="Spotify Logo" /> Spotiviz
+   </div>
+   <h1>Analytics Dashboard</h1>
+ </header>
+
+ <div class="container">
+   <nav class="sidebar">
+     <button onclick="location.href='../index.html'">Overview</button>
+     <button onclick="location.href='music_analytics.html'">Music Analytics</button>
+     <!-- <button onclick="location.href='genre_analytics.html'" class="active">Genre Analytics</button> -->
+     <div class="sidebar-dropdown">
+      <button class="sidebar-dropbtn"><center>Genre Analytics ▾ </center></button>
+      <div class="sidebar-dropdown-content">
+        <a href="genre_analytics.html" class="active">Global</a>
+        <a href="genre_analytics_local.html?city=chicago">Chicago</a>
+        <a href="genre_analytics_local.html?city=losangeles">Los Angeles</a>
+        <a href="genre_analytics_local.html?city=mexicocity">Mexico City</a>
+        <a href="genre_analytics_local.html?city=newyorkcity">New York City</a>
+        <a href="genre_analytics_local.html?city=toronto">Toronto</a>
+      </div>
+    </div>
+     <button onclick="location.href='kpi.html'">Key Performance Indicators</button>
+     <button onclick="location.href='settings.html'">About us</button>
+   </nav>
+
+   <main class="content genre-analytics-content">
+    <div class="visualization-container">
+      <h2>Genre Analytics </h2>
+
+    <label for="genreDropdown">Select Genre(s):</label>
+    <div class="genre-dropdown" id="genreDropdown">
+      <button type="button" id="genreBtn">Select Genres ▾</button>
+      <div class="genre-dropdown-menu" id="genreMenu">
+        <!-- checkboxes go here -->
+      </div>
+    </div>
+
+
+    <label for="rangeSelect">Select Time Range:</label>
+     <select id="rangeSelect">
+       <option value="3">Last 3 Months</option>
+       <option value="6">Last 6 Months</option>
+       <option value="12">Last 1 Year</option>
+       <option value="all">All Time</option>
+     </select>
+
+     <div>
+      <h3 id="topTracksHeader"><center></center></h3>
+    </div>
+     <div id="charts">
+      <svg id="topLineChart" viewBox="0 0 700 400" preserveAspectRatio="xMinYMin meet" class="responsive-chart"></svg>
+      <svg id="topPieChart" viewBox="0 0 600 300" preserveAspectRatio="xMinYMin meet" class="responsive-chart"></svg>
+    </div>
+    <div>
+      <h3 id="pulseTracksHeader"><center></center></h3>
+    </div>
+    <div id="charts">
+      <svg id="pulseLineChart" viewBox="0 0 750 400" preserveAspectRatio="xMinYMin meet" class="responsive-chart"></svg>
+      <svg id="pulsePieChart" viewBox="0 0 600 300" preserveAspectRatio="xMinYMin meet" class="responsive-chart"></svg>
+    </div>
+
+
+  </div>
+</main>
+
+</div>
+ <footer>
+   @ 2025 Spotify Analytics Dashboard
+ </footer>
+
+ <!-- <script src="../script.js"></script> -->
+ <script src="https://d3js.org/d3.v7.min.js"></script>
+ <script src="../script_genre_local.js"></script>
+</body>
+</html>

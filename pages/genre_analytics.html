@@ -39,21 +39,37 @@
    <nav class="sidebar">
      <button onclick="location.href='../index.html'">Overview</button>
      <button onclick="location.href='music_analytics.html'">Music Analytics</button>
-     <button onclick="location.href='genre_analytics.html'" class="active">Genre Analytics</button>
+     <!-- <button onclick="location.href='genre_analytics.html'" class="active">Genre Analytics</button> -->
+     <div class="sidebar-dropdown">
+      <button class="sidebar-dropbtn"><center>Genre Analytics ▾ </center></button>
+      <div class="sidebar-dropdown-content">
+        <a href="genre_analytics.html" class="active">Global</a>
+        <a href="genre_analytics_local.html?city=chicago">Chicago</a>
+        <a href="genre_analytics_local.html?city=losangeles">Los Angeles</a>
+        <a href="genre_analytics_local.html?city=mexicocity">Mexico City</a>
+        <a href="genre_analytics_local.html?city=newyorkcity">New York City</a>
+        <a href="genre_analytics_local.html?city=toronto">Toronto</a>
+      </div>
+    </div>
+
      <button onclick="location.href='kpi.html'">Key Performance Indicators</button>
      <button onclick="location.href='settings.html'">About us</button>
    </nav>
 
 
    <main class="content genre-analytics-content">
-     <h2>Genre Analytics</h2>
+    <div class="visualization-container">
+      <h2>Genre Analytics</h2>
 
+    <label for="genreDropdown">Select Genre(s):</label>
+    <div class="genre-dropdown" id="genreDropdown">
+      <button type="button" id="genreBtn">Select Genres ▾</button>
+      <div class="genre-dropdown-menu" id="genreMenu">
+        <!-- checkboxes go here -->
+      </div>
+    </div>
 
-     <label for="genreSelect">Select Genre:</label>
-     <select id="genreSelect"></select>
-
-
-     <label for="rangeSelect">Select Time Range:</label>
+    <label for="rangeSelect">Select Time Range:</label>
      <select id="rangeSelect">
        <option value="3">Last 3 Months</option>
        <option value="6">Last 6 Months</option>
@@ -61,14 +77,17 @@
        <option value="all">All Time</option>
      </select>
 
+     <div> <center> <h3> Top Tracks Global </h3></center> </div>
+      <div id="charts">
+        <svg id="lineChart" viewBox="0 0 800 500" preserveAspectRatio="xMinYMin meet" class="responsive-chart"></svg>
+        <svg id="pieChart" viewBox="0 0 800 500" preserveAspectRatio="xMinYMin meet" class="responsive-chart"></svg>
+      </div>
+      <div>  
 
-     <div id="charts">
-       <svg id="lineChart" width="500" height="350"></svg>
-       <svg id="barChart" width="500" height="350"></svg>
-     </div>
+    </div>
+    </div>
    </main>
  </div>
-
 
  <footer>
    @ 2025 Spotify Analytics Dashboard
@@ -78,38 +97,64 @@
  <script>
    const parseDate = d3.timeParse("%Y-%m-%d");
    const formatDate = d3.timeFormat("%Y-%m-%d");
-
-
-   let weeklyData, viralData, allDates, allGenres;
-
+   let weeklyData, allDates, allGenres;
 
    Promise.all([
-     d3.json("../data/songs-global-weekly.json"),
-     d3.json("../data/viral-global-daily.json")
-   ]).then(([weekly, viral]) => {
+     d3.json("../data/genre_ranking/songs-global-weekly.json"),
+   ]).then(([weekly]) => {
      weeklyData = weekly;
-     viralData = viral;
      allGenres = Object.keys(Object.values(weeklyData)[0]);
      allDates = Object.keys(weeklyData).map(parseDate).sort((a, b) => a - b);
 
+    const dropdown = d3.select("#genreDropdown");
+    const menu     = d3.select("#genreMenu");
+    const btn      = d3.select("#genreBtn");
 
-     const genreSelect = d3.select("#genreSelect");
-     genreSelect.selectAll("option")
-       .data(allGenres)
-       .enter()
-       .append("option")
-       .text(d => d)
-       .attr("value", d => d);
+    // populate checkboxes
+    menu.selectAll("label")
+      .data(allGenres)
+      .enter().append("label")
+        .html(d => `<input type="checkbox" value="${d}"> ${d}`);
 
+    // toggle open/close
+    btn.on("click", () => {
+      menu.classed("show", !menu.classed("show"));
+    });
 
-     genreSelect.on("change", updateCharts);
-     d3.select("#rangeSelect").on("change", updateCharts);
+    // close when clicking outside
+    d3.select("body").on("click", (event) => {
+      if (!dropdown.node().contains(event.target)) {
+        menu.classed("show", false);
+      }
+    });
 
+  const colorScale = d3.scaleOrdinal()
+    .domain(allGenres)
+    .range(d3.quantize(d3.interpolateTurbo, allGenres.length));
 
-     updateCharts();
+    // re-render on any change
+    menu.selectAll("input").on("change", () => {
+      const selected = menu.selectAll("input:checked").nodes().map(n=>n.value);
+      btn.text(
+        selected.length
+          ? `Genres: ${selected.join(", ")}`
+          : "Select Genres ▾"
+      );
+      updateCharts(selected, colorScale);
    });
 
+   // time-range changes → redraw
+    d3.select("#rangeSelect").on("change", () => {
+      const selected = menu.selectAll("input:checked")
+                           .nodes().map(n => n.value);
+      updateCharts(selected, colorScale);
+    });
 
+    // 5) initial draw (no genres selected → fallback inside)
+    updateCharts([], colorScale);
+
+  });
+  
    function getFilteredDates(range) {
      const today = new Date();
      if (range === "all") return allDates;
@@ -117,174 +162,232 @@
      return allDates.filter(d => d >= monthsAgo);
    }
 
+  function updateCharts(selectedGenres=[], colorScale) {
+    // grab every selected genre (fallback to first if none)
+    if (!selectedGenres.length) selectedGenres = [allGenres[0]];
 
-   function updateCharts() {
-     const selectedGenre = d3.select("#genreSelect").property("value") || allGenres[0];
-     const range = d3.select("#rangeSelect").property("value") || "3";
-     const filteredDates = getFilteredDates(range);
-     const formattedDates = filteredDates.map(formatDate);
+    const range = d3.select("#rangeSelect").property("value") || "3";
+    const filteredDates = getFilteredDates(range);
+    const datesFmt = filteredDates.map(formatDate);
+
+    // for each genre build its own date→stream series
+    const series = selectedGenres.map(genre => ({
+      genre,
+      values: datesFmt.map(date => ({
+        date: parseDate(date),
+        streams: (weeklyData[date] && weeklyData[date][genre]) || 0
+      }))
+    }));
+    
+    drawLineChart(series, colorScale);
+
+    // compute total streams per genre over the filtered dates
+    const dates = getFilteredDates(range).map(formatDate);
+    const totals = allGenres.map(genre => {
+      const sum = dates.reduce((acc, d) => {
+        return acc + ((weeklyData[d] && weeklyData[d][genre]) || 0);
+      }, 0);
+      return { genre, value: sum };
+    });
+
+  drawPieChart(totals, colorScale);    
+}
+
+function drawPieChart(data, colorScale) {
+  // clear
+  const svg = d3.select("#pieChart");
+  svg.selectAll("*").remove();
+
+  const svgNode = svg.node();
+  const fullW   = svgNode.viewBox.baseVal.width;
+  const fullH   = svgNode.viewBox.baseVal.height;
+  const margin  = fullH * 0.033;                                 // <-- extra padding
+  const width   = fullW  - margin * 2;
+  const height  = fullH - margin * 2;
+  const radius  = Math.min(width, height) / 2 - margin * 3;       // now fits inside padded box
+
+  // move the group into the padded center
+  const g = svg.append("g")
+    .attr(
+      "transform",
+      `translate(${margin + width/3},${margin + height/1.8})`
+    );
+
+  const pie = d3.pie().sort(null).value(d => d.value);
+  const arc = d3.arc().innerRadius(0).outerRadius(radius);
+  const labelArc = d3.arc().innerRadius(radius).outerRadius(radius + margin * 4);
+
+  const arcs = g.selectAll(".arc")
+    .data(pie(data))
+    .enter().append("g")
+      .attr("class", "arc");
+
+  // draw slices
+  arcs.append("path")
+    .attr("d", arc)
+    .attr("fill", d => colorScale(d.data.genre))
+    .attr("stroke", "#fff")
+    .attr("stroke-width", "1px");
+
+  // percentage labels just outside each slice
+  const total = d3.sum(data, d => d.value);
+  arcs.filter(d => (d.data.value / total) >= 0.01)
+    .append("text")
+    .attr("transform", d => `translate(${labelArc.centroid(d)})`)
+    .attr("dy", "0.35em")
+    .attr("text-anchor", "middle")
+    .attr("font-size", "14px")
+    .text(d => `${((d.data.value/total)*100).toFixed(1)}%`);
+
+    svg.append("text")
+      .attr("x", fullW / 2)
+      .attr("y", margin * 1.2)
+      .attr("text-anchor", "middle")
+      .attr("font-size", "18px")
+      .attr("font-weight", "bold")
+      .text("Genre Share");    
+
+  // legend
+  const legend = svg.append("g")
+    .attr("transform", `translate(${width - margin * 15}, ${margin})`);
+
+  data.forEach((s, i) => {
+    const yOff = 75 + i * 24;
+    legend.append("rect")
+      .attr("x", 0).attr("y", yOff - 8)
+      .attr("width", 12).attr("height", 14)
+      .attr("fill", colorScale(s.genre));
+
+    legend.append("text")
+      .attr("x", 18).attr("y", yOff)
+      .attr("dy", "0.32em")
+      .attr("font-size", "16px")
+      .text(s.genre);
+      // .text(s.genre + ': ' +  ((s.value/total)*100).toFixed(1) + '%');
+  });
+
+}
+
+function drawLineChart(series, colorScale) {
+  const svg = d3.select("#lineChart")
+    .attr("overflow", "visible");    // allow legend to show outside
+
+  svg.selectAll("*").remove();
+
+  const svgNode = svg.node();
+    const fullW   = svgNode.viewBox.baseVal.width;
+    const fullH   = svgNode.viewBox.baseVal.height;
+  
+    const margin = {
+        top:    fullH * 0.10,
+        right:  fullW * 0.20,  // enough room for legend
+        bottom: fullH * 0.10,
+        left:   fullW  * 0.10
+    };
+    const w  = fullW  - margin.left - margin.right;
+    const h = fullH - margin.top  - margin.bottom;
+
+  const g = svg.append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // x & y scales
+  const x = d3.scaleTime()
+      .domain(d3.extent(series[0].values, d => d.date))
+      .range([0, w]);
+
+  const y = d3.scaleLinear()
+      .domain([0, d3.max(series, s => d3.max(s.values, v => v.streams))])
+      .nice()
+      .range([h, 0]);
+
+  g.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", -margin.left + 20)
+    .attr("x", -h/2)
+    .attr("dy", "1em")
+    .attr("text-anchor", "middle")
+    .attr("font-size","16px")
+    .attr("font-weight", "bold")
+    .text("Stream Count");
+
+    g.append("text")
+      .attr("class", "chart-title")
+      .attr("text-anchor", "middle")
+      .attr("x", 600 / 2)
+      .attr("y", -30)
+      .attr("font-size", "18px")
+      .attr("font-weight", "bold")
+      .text(`Genre Popularity Over Time`);
 
 
-     const lineData = formattedDates.map(date => ({
-       date: parseDate(date),
-       streams: weeklyData[date]?.[selectedGenre] || 0
-     }));
+  // 2) axis generators with formatted y ticks
+  const yAxis = d3.axisLeft(y)
+      .ticks(6)
+      .tickFormat(d => {
+        return d3.format(".2s")(d).replace(/G$/, "B");
+      }); 
 
+  const xAxis = d3.axisBottom(x)
+      .tickFormat(getTickFormat());
 
-     drawLineChart(lineData);
+  g.append("g")
+    .call(yAxis);
 
+  g.append("g")
+    .attr("transform", `translate(0,${h})`)
+    .call(xAxis)
+    .selectAll("text")
+    .attr("font-size","14px")
+    .attr("transform", "rotate(-45)")
+    .style("text-anchor", "end");
 
-     const genreCounts = {};
-     formattedDates.forEach(date => {
-       if (viralData[date]) {
-         for (let genre in viralData[date]) {
-           if (!genreCounts[genre]) genreCounts[genre] = 0;
-           if (viralData[date][genre] > 0) genreCounts[genre]++;
-         }
-       }
-     });
+  // 3) line generator with smoothing
+  const line = d3.line()
+    .curve(d3.curveMonotoneX)     // smooth
+    .x(d => x(d.date))
+    .y(d => y(d.streams));
+  
+  // draw each series
+  series.forEach(s => {
+    g.append("path")
+      .datum(s.values)
+      .attr("fill", "none")
+      .attr("stroke", colorScale(s.genre))
+      .attr("stroke-width", 2)
+      .attr("font-size","14px")
+      .attr("d", line);
+  });
 
+  // legend
+  const legend = svg.append("g")
+    .attr("transform", `translate(${margin.left + w + 10}, ${margin.top})`);
 
-     const barData = Object.entries(genreCounts).map(([genre, count]) => ({ genre, count }));
-     drawBarChart(barData, selectedGenre);
-   }
+  series.forEach((s, i) => {
+    const yOff = i * 20;
+    legend.append("rect")
+      .attr("x", 0).attr("y", yOff - 8)
+      .attr("width", 12).attr("height", 12)
+      .attr("fill", colorScale(s.genre));
 
+    legend.append("text")
+      .attr("x", 18).attr("y", yOff)
+      .attr("dy", "0.32em")
+      .text(s.genre);
+  });
+}
 
-   function drawLineChart(data) {
-   const svg = d3.select("#lineChart");
-   svg.selectAll("*").remove();
+function getTickFormat() {
+  const r = d3.select("#rangeSelect").property("value");
+  return r === "3" || r === "6"
+    ? d3.timeFormat("%b %d")
+    : r === "12"
+      ? d3.timeFormat("%b")
+      : d3.timeFormat("%Y");
+}
 
-
-   const margin = { top: 20, right: 20, bottom: 70, left: 85 },
-           width = +svg.attr("width") - margin.left - margin.right,
-           height = +svg.attr("height") - margin.top - margin.bottom;
-
-
-   const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-
-
-   const x = d3.scaleTime().domain(d3.extent(data, d => d.date)).range([0, width]);
-   const y = d3.scaleLinear().domain([0, d3.max(data, d => d.streams)]).range([height, 0]);
-
-
-   // Detect selected range for smart formatting
-   const range = d3.select("#rangeSelect").property("value");
-   let tickFormat;
-   if (range === "3" || range === "6") {
-       tickFormat = d3.timeFormat("%b %d"); // Month Day
-   } else if (range === "12") {
-       tickFormat = d3.timeFormat("%b"); // Month
-   } else {
-       tickFormat = d3.timeFormat("%Y"); // Year
-   }
-
-
-   g.append("g")
-       .attr("transform", `translate(0,${height})`)
-       .call(d3.axisBottom(x).tickFormat(tickFormat))
-       .selectAll("text")
-       .attr("text-size","12px")
-       .attr("transform", "rotate(-45)")
-       .style("text-anchor", "end");
-
-
-   g.append("g").call(d3.axisLeft(y));
-
-
-   // Axis labels
-   g.append("text")
-       .attr("x", width / 2)
-       .attr("y", height + 60)
-       .attr("text-anchor", "middle")
-       .text("Date");
-
-
-   g.append("text")
-       .attr("transform", "rotate(-90)")
-       .attr("x", -height / 2)
-       .attr("y", -75)
-       .attr("text-anchor", "middle")
-       .attr("font-size","12px")
-       .text("Stream Count");
-      
-
-
-   const line = d3.line().x(d => x(d.date)).y(d => y(d.streams));
-
-
-   g.append("path")
-       .datum(data)
-       .attr("fill", "none")
-       .attr("stroke", "steelblue")
-       .attr("stroke-width", 2)
-       .attr("d", line);
-   }
-
-
-
-
-   function drawBarChart(data, selectedGenre) {
-     const svg = d3.select("#barChart");
-     svg.selectAll("*").remove();
-
-
-     const margin = { top: 20, right: 20, bottom: 90, left: 60 },
-           width = +svg.attr("width") - margin.left - margin.right,
-           height = +svg.attr("height") - margin.top - margin.bottom;
-
-
-     const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-
-
-     const x = d3.scaleBand().domain(data.map(d => d.genre)).range([0, width]).padding(0.2);
-     const y = d3.scaleLinear().domain([0, d3.max(data, d => d.count)]).range([height, 0]);
-
-
-     g.append("g")
-       .attr("transform", `translate(0,${height})`)
-       .call(d3.axisBottom(x))
-       .selectAll("text")
-       .attr("transform", "rotate(-45)")
-       .attr("text-size","12px")
-       .style("text-anchor", "end");
-
-
-     g.append("g").call(d3.axisLeft(y));
-
-
-     svg.append("text")
-       .attr("x", margin.left + width / 2)
-       .attr("y", height + margin.top + 80)
-       .attr("text-anchor", "middle")
-       .attr("font-size", "12px")
-       .text("Genre");
-
-
-     svg.append("text")
-       .attr("transform", "rotate(-90)")
-       .attr("x", -margin.top - height / 2)
-       .attr("y", 20)
-       .attr("text-anchor", "middle")
-       .attr("font-size", "12px")
-       .text("Number of Appearances in Top 100");
-
-
-     g.selectAll("rect")
-       .data(data)
-       .enter()
-       .append("rect")
-       .attr("x", d => x(d.genre))
-       .attr("y", d => y(d.count))
-       .attr("width", x.bandwidth())
-       .attr("height", d => height - y(d.count))
-       .attr("fill", d => d.genre === selectedGenre ? "#ff6600" : "#ccc");
-   }
  </script>
-
 
  <script src="../script.js"></script>
 </body>
 </html>
-
-
 
