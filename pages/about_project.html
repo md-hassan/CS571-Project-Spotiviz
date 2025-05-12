@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Spotiviz - Analytics</title>
+   <link rel="stylesheet" href="../styles.css">
+    <style>
+        body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        margin: auto;
+        background-color: #f9f9f9;
+        color: #333;
+        }
+        h1, h2, h3 {
+        color: #111;
+        }
+        a {
+        color: #1db954;
+        text-decoration: none;
+        }
+        a:hover {
+        text-decoration: underline;
+        }
+        iframe {
+        width: 800px;
+        height: 450px;
+        margin: 20px 0;
+        border: none;
+        }
+    </style>
+
+<body>
+   <header>
+       <div class="logo">
+           <img src="../data/spotify_image.jpg" alt="Spotify Logo"> Spotiviz
+       </div>
+       <h1>Analytics Dashboard</h1>
+   </header>
+
+
+   <div class="container">
+       <nav class="sidebar">
+           <button onclick="location.href='../index.html'">Overview</button>
+           <button onclick="location.href='music_analytics.html'">Music Analytics</button>
+           <!-- <button onclick="location.href='genre_analytics.html'">Genre Analytics</button> -->
+           <div class="sidebar-dropdown">
+            <button class="sidebar-dropbtn"><center>Genre Analytics ▾ </center></button>
+            <div class="sidebar-dropdown-content">
+              <a href="genre_analytics.html">Global</a>
+              <a href="genre_analytics_local.html?city=chicago">Chicago</a>
+              <a href="genre_analytics_local.html?city=losangeles">Los Angeles</a>
+              <a href="genre_analytics_local.html?city=mexicocity">Mexico City</a>
+              <a href="genre_analytics_local.html?city=newyorkcity">New York City</a>
+              <a href="genre_analytics_local.html?city=toronto">Toronto</a>
+            </div>
+          </div>
+           <button onclick="location.href='kpi.html'">Key Performance Indicators</button>
+           <button class="active" onclick="location.href='about_project.html'">About Spotiviz</button>
+           <button onclick="location.href='settings.html'">About us</button>
+       </nav>
+
+
+       <main class="content settings-content">
+          
+            <h1>About Spotiviz</h1>
+
+            <h2>Overview and Motivation</h2>
+            <p>
+                Music consumption has evolved significantly over time, influenced by cultural shifts, technological advancements, and platform-driven recommendations. Understanding these trends can provide valuable insights into how genre preferences, artist longevity, and album popularity change across different periods.
+            </p>
+            <p>
+                This project explores questions like: How long do viral songs or albums stay at the top? Do older tracks maintain relevance or experience sudden revivals? Which genres are rising or fading? How long do artists remain in the mainstream?
+            </p>
+            <p>
+                We also explore city-level genres analysis to uncover whether some genres are popular than others.
+            </p>
+
+            <h2>Key Insights from Our Visualizations</h2>
+            <ul>
+                <li><strong>Artist chart domination is concentrated:</strong> Just 2,290 artists produced 5,981 charting songs — a 2.6:1 ratio showing how success is skewed toward a few dominant artists.</li>
+                <li><strong>Chart persistence varies:</strong> Most artists appear briefly, while only a handful show prolonged presence across years.</li>
+                <li><strong>Genre dynamics are fluid:</strong> Timeline plots show Pop's consistent hold, while other genres rise and fall based on cultural trends.</li>
+                <li><strong>Top charts are genre-concentrated:</strong> Pop, Rock, and Hip-Hop/Rap dominate global charts, leaving little space for Jazz, Reggae, Classical, etc.</li>
+                <li><strong>City-level diversity reveals local tastes:</strong> Local Top 100 charts highlight emerging and regionally favored genres often missing from global rankings.</li>
+            </ul>
+
+            <h2>Screencast Demo</h2>
+            <p>Watch this screencast for a quick walkthrough of the Spotiviz platform:</p>
+            <center>
+            <iframe src="https://www.youtube.com/embed/wFi1tBVjQGc?si=1pRlVu2bYDrWfxrs" title="Spotiviz Screencast"></iframe>
+            </center>
+
+            <h2>Additional Resources</h2>
+            <ul>
+                <li><a href="https://github.com/md-hassan/CS571-Project-Spotiviz/blob/main/CS571_ProcessBook.pdf" target="_blank">📘 View our Process Book</a></li> <!-- Replace with actual file -->
+                <li><a href="https://github.com/md-hassan/CS571-Project-Spotiviz/tree/main/data" target="_blank">📊 Access the Dataset</a></li> <!-- Replace with actual data source -->
+            </ul>
+            <br>
+            <br>
+            <br>
+        
+        </main>
+   </div>
+
+
+   <footer>
+       @ 2025 Spotify Analytics Dashboard
+   </footer>
+
+
+   <script src="../script.js"></script>
+</body>
+</html>
+
